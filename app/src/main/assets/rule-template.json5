@@ -1,0 +1,106 @@
+{
+  // 站点的 URL，必填
+  "url": "",
+  // 站点名称
+  "name": "",
+  // 需要备注的信息
+  "comment": "主要语法：CSS Selector、XPath，非必填属性可删除。支持 @js: 做响应体转换和 URL 参数计算，示例见 search.url / search.result",
+  // 源站默认语言，默认从系统获取语言，可选值：zh-CN、zh-TW、zh-Hant
+  language: "",
+  // 是否禁用书源
+  "disabled": false,
+  // 提取搜索结果的信息，不支持搜索的书源可不填
+  "search": {
+    // 是否禁用搜索
+    "disabled": false,
+    // 搜索链接，必填。若含 @js:，则 JS 接收 keyword 返回完整 URL（例：计算加密参数）
+    "url": "",
+    // 请求方法（GET, POST），必填
+    "method": "",
+    // 请求体，{k1: v1, k2: v2, ...}
+    "data": "{}",
+    // 键值对格式的 cookies，{k1: v1, k2: v2, ...}
+    "cookies": "{}",
+    // 每条搜索记录，必填。若含 @js:，则 JS 接收响应体并返回转换后的 HTML（例：JSONP 中提取 HTML）
+    "result": "",
+    // 书名，必填
+    "bookName": "",
+    // 作者，必填
+    "author": "",
+    // 类别
+    "category": "",
+    // 字数
+    "wordCount": "",
+    // 连载状态
+    "status": "",
+    // 最新章节
+    "latestChapter": "",
+    // 最后更新时间
+    "lastUpdateTime": "",
+    // 下一页链接
+    "nextPage": ""
+  },
+  // 提取详情页的信息
+  "book": {
+    // 详情页链接，当目录页和详情页不在同一个页面时需要填写
+    "url": "",
+    // 以下属性 <meta> 里有就不用填
+    // 书名，必填
+    "bookName": "",
+    // 作者，必填
+    "author": "",
+    // 简介
+    "intro": "",
+    "category": "",
+    // 封面链接
+    "coverUrl": "",
+    "latestChapter": "",
+    "lastUpdateTime": "",
+    "status": "",
+  },
+  // 提取目录页的信息
+  "toc": {
+    // 当目录中的章节链接是相对路径时需要填写
+    "baseUri": "",
+    // 目录页链接正则，当目录页和详情页不在同一个页面时需要填写
+    "url": "",
+    // 目录里的章节链接，必填
+    "item": "",
+    // 是否默认倒序
+    "isDesc": false,
+    // 下一页链接
+    "nextPage": ""
+  },
+  // 提取章节页的信息
+  "chapter": {
+    // 章节名，必填
+    "title": "",
+    // 章节内容，必填
+    "content": "",
+    // 是否有段落标签（<tag>段落</tag>）
+    "paragraphTagClosed": false,
+    // 不是 <tag>段落</tag> 时的分隔符
+    "paragraphTag": "",
+    // 需要过滤的文本，正则
+    "filterTxt": "",
+    // 需要过滤的 html 标签
+    "filterTag": "",
+    // 下一页链接
+    "nextPage": ""
+  },
+  // 限流书源必填
+  "crawl": {
+    // 并发数
+    "concurrency": 0,
+    // 最小间隔（单位：秒）
+    "minInterval": 0,
+    // 最大间隔（单位：秒）
+    "maxInterval": 0,
+    // 最大重试次数
+    "maxAttempts": 0,
+    // 重试时的最小间隔（单位：秒）
+    "retryMinInterval": 0,
+    // 重试时的最大间隔（单位：秒）
+    "retryMaxInterval": 0
+  }
+}

@@ -1,0 +1,75 @@
+[
+  {
+    "url": "https://www.xiaoshuohu.com/",
+    "name": "小说虎",
+    "comment": "搜索功能关闭，正文广告较多，需手动过滤",
+    "search": {
+      "disabled": true,
+      "url": "https://www.sososhu.com/?q=%s&site=xshbook",
+      "method": "get",
+      "result": "body > div.wrap > div > div > div",
+      "bookName": "dl > dt > a",
+      "author": "dl > dt > span",
+      "intro": "dl > dd"
+    },
+    "book": {
+      "url": "https://www.xiaoshuohu.com/0/(.*?)/"
+    },
+    "toc": {
+      "item": "#list > dl > dd > a"
+    },
+    "chapter": {
+      "title": ".bookname > h1",
+      "content": "#content",
+      "paragraphTagClosed": true,
+      "filterTxt": "\\(本章完\\)|一秒记住.↘小说虎首^发↘.手机用户输入地址：m.xshbook.com| 支持.^完*本*神*站*^.把本站分享那些需要的小伙伴！找不到书请留言！|（记住本站网址，，方便下次或且百度输入“”，就能进入本站）|手机直接访问:m.xshbook .com|记不住网址，可以百度搜索:【小说虎 】|↘完♂本♂神♂立占↙手机用户输入地址：m.xshbook.com|支持：↘完♂本♂神♂立占↙喜欢本站的朋友可以多多推荐给更多爱看书伙伴们！|⾸发免费看书搜：看书群kanshuqun.com",
+      "filterTag": ""
+    }
+  },
+  {
+    "url": "https://cn.ttkan.co/",
+    "name": "天天看小说",
+    "comment": "现无法搜索",
+    "book": {
+      "url": "https://cn.ttkan.co/novel/chapters/(.*?)",
+      "bookName": "meta[name=\"og:novel:book_name\"]",
+      "author": "meta[name=\"og:novel:author\"]",
+      "intro": "meta[name=\"og:description\"]@js:r=r.replaceAll('天天看小说：','');",
+      "category": "meta[name=\"og:novel:category\"]",
+      "coverUrl": "meta[name=\"og:image\"]",
+      "latestChapter": "meta[name=\"og:novel:latest_chapter_name\"]",
+      "status": "meta[name=\"og:novel:status\"]"
+    },
+    "toc": {
+      "item": ".full_chapters > div:nth-child(1) > a"
+    },
+    "chapter": {
+      "title": ".title > h1",
+      "content": "div.content",
+      "paragraphTagClosed": true,
+      "filterTxt": "\\(本章完\\)",
+      "filterTag": "a, center, div"
+    }
+  },
+  {
+    "url": "https://xszj.org/",
+    "name": "小说之家",
+    "comment": "搜索有验证码、章节限流error code: 1015",
+    "book": {
+      "url": "/b/(\\d+)"
+    },
+    "toc": {
+      "url": "https://xszj.org/b/%s/cs/1",
+      "item": "#content_1 > a",
+      "nextPage": "#indexselect > option"
+    },
+    "chapter": {
+      "title": "#wrapper > article > h1",
+      "content": "#booktxt",
+      "paragraphTagClosed": "true",
+      "filterTag": "script",
+      "filterTxt": "\\(本章完\\)|小说之家为广大书友们提供好看的网络小说全文免费在线阅读，如果您喜欢本站，请分享给更多的书友们！|如果您觉得《.+》小说很精彩的话，请粘贴以下网址分享给您的好友，谢谢支持！|（本书网址：.*?）",
+      "nextPage": "#wrapper > article > div.bottem1 > a:nth-child(3)"
+    }
+  }
+]

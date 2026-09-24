@@ -1,0 +1,90 @@
+[
+  {
+    "url": "http://www.xhytd.com/",
+    "name": "黄易天地",
+    "comment": "非大陆IP可能速度较慢",
+    "search": {
+      "disabled": true,
+      "url": "http://www.xhytd.com/search.html?name=%s",
+      "method": "get",
+      "result": "#main > div.novelslist2 > ul > li",
+      "bookName": "span.s2.wid > a",
+      "author": "span.s4.wid > a",
+      "latestChapter": "span.s3.wid3 > a",
+      "lastUpdateTime": "span.s6.wid6"
+    },
+    "book": {
+    },
+    "toc": {
+      "item": "#list > dl > dt:nth-of-type(2) ~ dd > a"
+    },
+    "chapter": {
+      "title": "h1",
+      "content": "#content",
+      "paragraphTagClosed": false,
+      "paragraphTag": "<br>+",
+      "filterTxt": "",
+      "filterTag": "p, div"
+    }
+  },
+  {
+    "url": "https://www.96dushu.com/",
+    "name": "96读书",
+    "comment": "章节JS加密",
+    "search": {
+      "disabled": true,
+      "url": "https://www.96dushu.com/modules/article/search.php",
+      "method": "post",
+      "data": "{searchkey: %s}",
+      "result": "#nr",
+      "bookName": "dd:nth-child(2) > h3 > a",
+      "author": "dd:nth-child(3) > span:nth-child(1)",
+      "category": "dt > span",
+      "latestChapter": "dd:nth-child(5) > a",
+      "lastUpdateTime": "dd:nth-child(2) > h3 > span",
+      "status": "dd:nth-child(3) > span:nth-child(2)",
+      "nextPage": "#pagelink > a:not(.first):not(.last)"
+    },
+    "book": {
+      "url": "https://www.96dushu.com/book/(.*?)/"
+    },
+    "toc": {
+      "item": "#chapterList > li > a"
+    },
+    "chapter": {
+      "title": "#mlfy_main_text > h1",
+      "content": "#content@js:r=r.replace(/<script>\\s*document\\.writeln\\(qsbs\\.bb\\('([^']+)'\\)\\);\\s*<\\/script>/g,function(a,b){return b});@java:base64.decode()",
+      "paragraphTagClosed": true,
+      "filterTxt": "\\((继续下一页|本章完)\\)|最⊥新⊥小⊥说⊥在⊥六⊥9⊥⊥书⊥⊥吧⊥⊥首⊥发！",
+      "filterTag": "",
+      "nextPage": "#readbg > div.mlfy_page > a:nth-child(4)",
+      "nextPageInJs": "//*[@id=\"readbg\"]/script[4]@js:r=r.match(/nextpage = \"(.*?)\"/)[1];"
+    }
+  },
+  {
+    "url": "http://www.dongtanxs.com/",
+    "name": "东滩小说",
+    "comment": "",
+    "search": {
+      "url": "http://www.dongtanxs.com/s.php?ie=utf-8&q=%s",
+      "method": "get",
+      "result": ".bookinfo",
+      "bookName": "h4 > a",
+      "author": "div.author",
+      "category": "div.cat",
+      "latestChapter": "div.update > a"
+    },
+    "book": {
+    },
+    "toc": {
+      "item": "dl > dt:nth-of-type(2) ~ dd > a"
+    },
+    "chapter": {
+      "title": ".content > h1",
+      "content": "#content",
+      "paragraphTagClosed": false,
+      "paragraphTag": "<br>+",
+      "filterTxt": "http://www\\.dongtanxs\\.com/dongtan\\d+/\\d+\\.html\\s*|请记住本书首发域名：www\\.dongtanxs\\.com。东滩小说手机版阅读网址：m\\.dongtanxs\\.com"
+    }
+  }
+]

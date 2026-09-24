@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 一本打开的书 + 下载箭头 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 左页 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M33,38 C39,36 46,36.5 52,40 L52,72 C46,68.8 39,68.4 33,70 Z" />
+    <!-- 右页 -->
+    <path
+        android:fillColor="#E3F4EE"
+        android:pathData="M56,40 C62,36.5 69,36 75,38 L75,70 C69,68.4 62,68.8 56,72 Z" />
+    <!-- 左页文字线 -->
+    <path
+        android:strokeColor="#9CCFC1"
+        android:strokeWidth="1.6"
+        android:strokeLineCap="round"
+        android:pathData="M37,45 C41,44.2 45,44.4 48,45.6 M37,51 C41,50.2 45,50.4 48,51.6 M37,57 C41,56.2 45,56.4 48,57.6" />
+    <!-- 下载箭头 -->
+    <path
+        android:strokeColor="#1F6F5C"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M65.5,45 L65.5,59 M60.5,54 L65.5,59 L70.5,54" />
+</vector>
