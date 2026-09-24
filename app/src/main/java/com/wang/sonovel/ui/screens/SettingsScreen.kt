@@ -282,7 +282,7 @@ fun AboutScreen(onBack: () -> Unit) {
                 }
             }
             Spacer(Modifier.height(8.dp))
-            SettingItem("原项目主页", "github.com/freeok/so-novel", Icons.Outlined.Code, onClick = { open("https://github.com/freeok/so-novel") })
+            SettingItem("项目主页", "github.com/whykang/sonovel--Android", Icons.Outlined.Code, onClick = { open("https://github.com/whykang/sonovel--Android") })
             SettingItem("书源说明", "各规则文件的适用场景与注意事项", Icons.Outlined.Description, onClick = {
                 open("https://github.com/freeok/so-novel/blob/main/BOOK_SOURCES.md")
             })
