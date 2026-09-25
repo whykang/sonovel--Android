@@ -4,6 +4,12 @@
 
 > 本项目参考开源项目 [freeok/so-novel](https://github.com/freeok/so-novel) 开发，书源规则与功能设计均来自原项目。
 
+## 截图
+
+| 搜索 | 书架 | 阅读器 |
+| :---: | :---: | :---: |
+| <img src="screenshots/search.jpg" width="260"/> | <img src="screenshots/library.jpg" width="260"/> | <img src="screenshots/reader.jpg" width="260"/> |
+
 ## 功能
 
 - **搜索**：聚合搜索（同时查询当前规则文件内全部书源，按相似度排序）或指定单个书源搜索；搜索建议、搜索历史
