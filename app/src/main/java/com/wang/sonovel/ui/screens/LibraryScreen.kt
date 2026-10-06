@@ -3,6 +3,8 @@ package com.wang.sonovel.ui.screens
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.text.format.DateUtils
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +28,7 @@ import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.DeleteSweep
+import androidx.compose.material.icons.outlined.FileOpen
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.OpenInNew
@@ -82,7 +85,11 @@ fun LibraryScreen(onRead: (java.io.File) -> Unit) {
     val scope = rememberCoroutineScope()
     var confirmDelete by remember { mutableStateOf<LocalBook?>(null) }
 
-    LaunchedEffect(Unit) { g.library.refresh() }
+    LaunchedEffect(Unit) {
+        g.library.refresh()
+        // 给还没有封面的 EPUB / PDF 补提取封面（后台进行）
+        withContext(Dispatchers.IO) { g.library.fillMissingCovers() }
+    }
 
     val progressVersion by g.progress.version.collectAsStateWithLifecycle()
 
@@ -90,6 +97,27 @@ fun LibraryScreen(onRead: (java.io.File) -> Unit) {
     fun progressOf(b: LocalBook): Int {
         progressVersion // 进度变化时触发重组
         return g.progress.get(b.file)?.percent ?: 0
+    }
+
+    // 导入本地书籍：可一次选择多个文件
+    var importing by remember { mutableStateOf(false) }
+    val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+        if (uris.isEmpty()) return@rememberLauncherForActivityResult
+        importing = true
+        scope.launch {
+            val results = withContext(Dispatchers.IO) { uris.map { u -> runCatching { g.library.importBook(u) } } }
+            importing = false
+            val ok = results.mapNotNull { it.getOrNull() }
+            val failed = results.mapNotNull { it.exceptionOrNull() }
+            snack(
+                when {
+                    failed.isEmpty() && ok.size == 1 -> "已导入《${ok[0]}》"
+                    failed.isEmpty() -> "已导入 ${ok.size} 本书"
+                    ok.isEmpty() -> "导入失败：${failed[0].message}"
+                    else -> "已导入 ${ok.size} 本，${failed.size} 个失败：${failed[0].message}"
+                }
+            )
+        }
     }
 
     fun openExternal(b: LocalBook) {
@@ -101,14 +129,21 @@ fun LibraryScreen(onRead: (java.io.File) -> Unit) {
     }
 
     Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars)) {
-        Text(
-            "书架", style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(start = 20.dp, top = 16.dp, bottom = 4.dp),
-        )
+        Row(
+            Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("书架", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
+            TextButton(onClick = { importer.launch(arrayOf("*/*")) }, enabled = !importing) {
+                Icon(Icons.Outlined.FileOpen, null, Modifier.size(18.dp))
+                Spacer(Modifier.width(4.dp))
+                Text(if (importing) "导入中…" else "导入")
+            }
+        }
         if (tasks.isEmpty() && books.isEmpty()) {
             EmptyState(
                 Icons.AutoMirrored.Outlined.LibraryBooks, "书架空空如也",
-                "在“搜索”页找到喜欢的书并下载，下载进度和已下载的书都会显示在这里",
+                "在“搜索”页找到喜欢的书并下载，或点右上角“导入”添加本地的 EPUB / TXT / PDF 书籍",
             )
             return@Column
         }
@@ -166,7 +201,7 @@ fun LibraryScreen(onRead: (java.io.File) -> Unit) {
     confirmDelete?.let { b ->
         ConfirmDialog(
             title = "删除《${b.bookName}》？",
-            text = "将从书架删除该文件（已保存到“下载/SoNovel”的副本不受影响）。",
+            text = "将从书架删除该文件（导入时的原文件、已保存到“下载/SoNovel”的副本不受影响）。",
             confirm = "删除",
             onDismiss = { confirmDelete = null },
             onConfirm = { g.progress.clear(b.file); g.library.delete(b) },

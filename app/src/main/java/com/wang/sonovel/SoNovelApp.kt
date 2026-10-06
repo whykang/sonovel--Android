@@ -5,6 +5,7 @@ import android.content.Context
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.disk.DiskCache
+import com.wang.sonovel.core.Analytics
 import com.wang.sonovel.core.ChineseConverter
 import com.wang.sonovel.core.Http
 import com.wang.sonovel.core.JsEngine
@@ -38,6 +39,7 @@ class SoNovelApp : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
         ChineseConverter.init(this)
+        Analytics.start(this)
         graph = AppGraph(this)
         DownloadService.createChannels(this)
         // 预加载 QuickJS 原生库

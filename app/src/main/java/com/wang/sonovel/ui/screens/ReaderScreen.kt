@@ -78,6 +78,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -105,6 +106,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.wang.sonovel.graph
+import com.wang.sonovel.ui.components.ImmersiveSheetEffect
+import com.wang.sonovel.ui.components.ReaderSystemBars
 import com.wang.sonovel.reader.BookReadSource
 import com.wang.sonovel.reader.PageMode
 import com.wang.sonovel.reader.ReaderChapter
@@ -176,6 +179,7 @@ class ReaderViewModel(app: Application, private val path: String) : AndroidViewM
         loadJob = viewModelScope.launch {
             val paras = withContext(Dispatchers.IO) {
                 runCatching { src.paragraphs(index) }.getOrElse { listOf("本章内容加载失败：${it.message}") }
+                    .ifEmpty { listOf("（本章没有文字内容）") }
             }
             position = restore ?: (0 to 0)
             // 章节序号与正文同时更新，避免翻页时闪烁
@@ -227,6 +231,9 @@ fun ReaderScreen(path: String, onBack: () -> Unit) {
     val custom = prefs.theme.colors
     val bg = custom?.first ?: MaterialTheme.colorScheme.surface
     val fg = custom?.second ?: MaterialTheme.colorScheme.onSurface
+
+    // 状态栏图标与小白条的深浅跟随阅读背景
+    ReaderSystemBars(lightBackground = bg.luminance() > 0.5f)
 
     // 阅读时保持屏幕常亮
     DisposableEffect(prefs.keepScreenOn) {
@@ -340,6 +347,7 @@ fun ReaderScreen(path: String, onBack: () -> Unit) {
             onDismissRequest = { showToc = false },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         ) {
+            ImmersiveSheetEffect()
             val tocState = rememberLazyListState()
             LaunchedEffect(Unit) { tocState.scrollToItem((st.index - 3).coerceAtLeast(0)) }
             Text(
@@ -693,6 +701,7 @@ private fun ScrollReader(
 private fun ReaderSettingsSheet(prefs: ReaderPrefs, onDismiss: () -> Unit) {
     val repo = LocalContext.current.graph.readerPrefs
     ModalBottomSheet(onDismissRequest = onDismiss) {
+        ImmersiveSheetEffect()
         Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
             Text("阅读设置", style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(16.dp))

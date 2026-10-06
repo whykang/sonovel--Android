@@ -92,6 +92,7 @@ import com.wang.sonovel.data.LangType
 import com.wang.sonovel.data.Rule
 import com.wang.sonovel.download.DownloadRequest
 import com.wang.sonovel.graph
+import com.wang.sonovel.ui.components.ImmersiveSheetEffect
 import com.wang.sonovel.ui.LocalSnackbar
 import com.wang.sonovel.ui.components.BookCover
 import com.wang.sonovel.ui.components.Pill
@@ -442,6 +443,7 @@ fun DownloadSheet(
     }
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+        ImmersiveSheetEffect()
         Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp)) {
             Text("下载选项", style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(16.dp))

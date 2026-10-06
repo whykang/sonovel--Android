@@ -6,6 +6,7 @@ import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,11 +21,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Cloud
+import androidx.compose.material.icons.outlined.Contrast
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Cookie
 import androidx.compose.material.icons.outlined.DarkMode
@@ -83,6 +86,8 @@ import com.wang.sonovel.ui.components.InputDialog
 import com.wang.sonovel.ui.components.SectionTitle
 import com.wang.sonovel.ui.components.SettingItem
 import com.wang.sonovel.ui.components.SwitchItem
+import com.wang.sonovel.ui.components.ThemeColorDialog
+import com.wang.sonovel.ui.components.themeColorLabel
 import com.wang.sonovel.ui.components.formatSize
 import com.wang.sonovel.ui.rememberSnack
 import kotlinx.coroutines.Dispatchers
@@ -113,6 +118,7 @@ fun SettingsScreen(onAbout: () -> Unit) {
     val s by g.settings.state.collectAsStateWithLifecycle()
     var dialog by remember { mutableStateOf<SettingDialog?>(null) }
     var confirmReset by remember { mutableStateOf(false) }
+    var showThemeColor by remember { mutableStateOf(false) }
     var cacheSize by remember { mutableLongStateOf(0L) }
     val scope = rememberCoroutineScope()
     val snack = rememberSnack()
@@ -130,9 +136,10 @@ fun SettingsScreen(onAbout: () -> Unit) {
         SettingItem("主题", s.themeMode.label, Icons.Outlined.DarkMode, onClick = {
             dialog = SettingDialog.Choice("主题", ThemeMode.entries, s.themeMode, { it.label }) { v -> set { it.copy(themeMode = v) } }
         })
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            SwitchItem("动态取色", "跟随系统壁纸颜色（Android 12+）", s.dynamicColor, Icons.Outlined.Palette) { v -> set { it.copy(dynamicColor = v) } }
+        SettingItem("主题色", themeColorLabel(s), Icons.Outlined.Palette, onClick = { showThemeColor = true }) {
+            Box(Modifier.size(24.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
         }
+        SwitchItem("纯黑背景", "深色模式下使用纯黑背景，OLED 屏幕更省电", s.pureBlack, Icons.Outlined.Contrast) { v -> set { it.copy(pureBlack = v) } }
 
         SectionTitle("下载")
         SettingItem("默认格式", s.format.label, Icons.Outlined.Description, onClick = {
@@ -234,6 +241,14 @@ fun SettingsScreen(onAbout: () -> Unit) {
             d.title, d.initial, d.hint, d.numeric, validate = d.validate, onDismiss = { dialog = null }, onConfirm = d.onConfirm,
         )
         null -> Unit
+    }
+
+    if (showThemeColor) {
+        ThemeColorDialog(
+            settings = s,
+            onChange = { dynamic, seed -> set { it.copy(dynamicColor = dynamic, themeSeed = seed) } },
+            onDismiss = { showThemeColor = false },
+        )
     }
 
     if (confirmReset) {

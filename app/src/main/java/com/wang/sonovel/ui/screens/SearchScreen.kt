@@ -69,6 +69,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.wang.sonovel.core.Analytics
 import com.wang.sonovel.core.Misc
 import com.wang.sonovel.core.SearchParser
 import com.wang.sonovel.core.SearchRanker
@@ -76,6 +77,7 @@ import com.wang.sonovel.core.SourceContext
 import com.wang.sonovel.data.Rule
 import com.wang.sonovel.data.SearchResult
 import com.wang.sonovel.graph
+import com.wang.sonovel.ui.components.ImmersiveSheetEffect
 import com.wang.sonovel.ui.components.BookCover
 import com.wang.sonovel.ui.components.EmptyState
 import com.wang.sonovel.ui.components.Pill
@@ -144,6 +146,7 @@ class SearchViewModel(app: Application) : AndroidViewModel(app) {
         clearSuggestions()
         searchJob?.cancel()
         g.history.add(kw)
+        Analytics.event("search", mapOf("mode" to if (state.value.sourceKey == null) "aggregated" else "single"))
         val s = g.settings.current
         val key = state.value.sourceKey
         val sources: List<Rule> = if (key != null) listOfNotNull(g.rules.byKey(key)) else g.rules.searchableRules()
@@ -331,6 +334,7 @@ fun SearchScreen(
 
     if (showSourcePicker) {
         ModalBottomSheet(onDismissRequest = { showSourcePicker = false }) {
+            ImmersiveSheetEffect()
             Text("选择书源", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(horizontal = 24.dp))
             Text(
                 "聚合搜索会同时查询所有书源并按相似度排序",
@@ -360,6 +364,7 @@ fun SearchScreen(
 
     if (showStatus) {
         ModalBottomSheet(onDismissRequest = { showStatus = false }) {
+            ImmersiveSheetEffect()
             Text("书源搜索情况", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(horizontal = 24.dp))
             LazyColumn {
                 items(ui.sources, key = { it.first.key }) { (rule, st) ->

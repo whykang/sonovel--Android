@@ -81,6 +81,7 @@ import com.wang.sonovel.data.Rule
 import com.wang.sonovel.data.RuleFile
 import com.wang.sonovel.data.SourceStatus
 import com.wang.sonovel.graph
+import com.wang.sonovel.ui.components.ImmersiveSheetEffect
 import com.wang.sonovel.ui.components.ConfirmDialog
 import com.wang.sonovel.ui.components.Pill
 import com.wang.sonovel.ui.rememberSnack
@@ -249,6 +250,7 @@ fun SourcesScreen(vm: SourcesViewModel = viewModel()) {
         val json = remember(r) { g.rules.rawJson(r) }
         val ruleFile = files.firstOrNull { it.name == r.file }
         ModalBottomSheet(onDismissRequest = { detail = null }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+            ImmersiveSheetEffect()
             Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {

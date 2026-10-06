@@ -2,6 +2,7 @@ package com.wang.sonovel.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
@@ -10,12 +11,15 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.materialkolor.PaletteStyle
+import com.materialkolor.dynamicColorScheme
 import com.wang.sonovel.data.ThemeMode
 
 private val LightColors = lightColorScheme(
@@ -105,6 +109,28 @@ private val AppShapes = Shapes(
     extraLarge = androidx.compose.foundation.shape.RoundedCornerShape(28.dp),
 )
 
+/** 深色模式的纯黑背景（AMOLED 屏更省电） */
+private fun ColorScheme.pureBlack(): ColorScheme = copy(
+    background = Color.Black,
+    surface = Color.Black,
+    surfaceDim = Color.Black,
+    surfaceContainerLowest = Color.Black,
+    surfaceContainerLow = Color(0xFF0B0B0B),
+    surfaceContainer = Color(0xFF111111),
+    surfaceContainerHigh = Color(0xFF181818),
+    surfaceContainerHighest = Color(0xFF202020),
+)
+
+/** 把 #RRGGBB 解析为颜色，格式不对时返回 null */
+fun parseSeedColor(hex: String?): Color? {
+    val h = hex?.trim()?.removePrefix("#") ?: return null
+    if (h.length != 6) return null
+    return h.toLongOrNull(16)?.let { Color(0xFF000000 or it) }
+}
+
+/** 默认主题的代表色（绿色） */
+val DefaultSeedColor = Color(0xFF1F6F5C)
+
 @Composable
 fun isAppInDarkTheme(mode: ThemeMode): Boolean = when (mode) {
     ThemeMode.SYSTEM -> isSystemInDarkTheme()
@@ -116,14 +142,21 @@ fun isAppInDarkTheme(mode: ThemeMode): Boolean = when (mode) {
 fun SoNovelTheme(
     darkTheme: Boolean,
     dynamicColor: Boolean,
+    seed: Color? = null,
+    pureBlack: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
-    val colors = when {
+    val base = when {
+        // 自选主题色：按 Material 3 算法由种子色生成整套配色
+        seed != null -> remember(seed, darkTheme) {
+            dynamicColorScheme(seedColor = seed, isDark = darkTheme, isAmoled = false, style = PaletteStyle.TonalSpot)
+        }
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         darkTheme -> DarkColors
         else -> LightColors
     }
+    val colors = if (darkTheme && pureBlack) base.pureBlack() else base
     MaterialTheme(colorScheme = colors, typography = AppTypography, shapes = AppShapes, content = content)
 }

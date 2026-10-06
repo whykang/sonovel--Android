@@ -3,14 +3,21 @@ package com.wang.sonovel.data
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.os.ParcelFileDescriptor
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import androidx.core.content.FileProvider
+import com.wang.sonovel.reader.readEpubMeta
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.io.ByteArrayOutputStream
 import java.io.File
 
 data class LocalBook(
@@ -68,7 +75,98 @@ class LibraryRepository(private val context: Context) {
     fun delete(book: LocalBook) {
         book.file.delete()
         book.cover?.delete()
+        File(coversDir, "${book.file.name}.nocover2").delete()
         refresh()
+    }
+
+    /**
+     * 导入本地书籍（EPUB / TXT / PDF）到书架，返回书名。
+     * EPUB 会读取内置的书名、作者和封面；其他格式使用文件名。
+     */
+    fun importBook(uri: Uri): String {
+        val resolver = context.contentResolver
+        val displayName = resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
+            if (c.moveToFirst()) c.getString(0) else null
+        } ?: uri.lastPathSegment?.substringAfterLast('/') ?: "book"
+        val ext = displayName.substringAfterLast('.', "").lowercase()
+        require(ext in IMPORT_EXTENSIONS) { "不支持的格式：$displayName（支持 EPUB、TXT、PDF）" }
+
+        val tmp = File(booksDir, ".import-${System.nanoTime()}.part")
+        try {
+            (resolver.openInputStream(uri) ?: throw IllegalStateException("无法读取文件")).use { input ->
+                tmp.outputStream().use { input.copyTo(it) }
+            }
+            require(tmp.length() > 0) { "文件为空：$displayName" }
+
+            var base = displayName.substringBeforeLast('.')
+            var cover: ByteArray? = null
+            if (ext == "epub") {
+                val meta = runCatching { readEpubMeta(tmp) }.getOrNull()
+                cover = meta?.cover
+                val title = meta?.title
+                if (!title.isNullOrBlank()) base = if (meta.author.isNullOrBlank()) title else "$title(${meta.author})"
+            }
+            base = sanitize(base)
+            // 重名时加序号（放在书名后、作者前，避免被识别为作者）
+            var target = File(booksDir, "$base.$ext")
+            var n = 2
+            while (target.exists()) {
+                val m = NAME_RE.matchEntire(base)
+                val name = if (m != null) "${m.groupValues[1]}_$n(${m.groupValues[2]})" else "${base}_$n"
+                target = File(booksDir, "$name.$ext")
+                n++
+            }
+            if (!tmp.renameTo(target)) {
+                tmp.copyTo(target, overwrite = true)
+            }
+            saveCover(target, cover ?: runCatching { extractCover(target) }.getOrNull())
+            refresh()
+            return NAME_RE.matchEntire(target.nameWithoutExtension)?.groupValues?.get(1) ?: target.nameWithoutExtension
+        } finally {
+            tmp.delete()
+        }
+    }
+
+    /** 从书籍文件中提取封面：EPUB 取内置封面，PDF 取第一页 */
+    private fun extractCover(file: File): ByteArray? = when (file.extension.lowercase()) {
+        "epub" -> readEpubMeta(file).cover
+        "pdf" -> pdfFirstPage(file)
+        else -> null
+    }
+
+    private fun pdfFirstPage(file: File): ByteArray? =
+        ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY).use { fd ->
+            PdfRenderer(fd).use { renderer ->
+                if (renderer.pageCount == 0) return null
+                renderer.openPage(0).use { page ->
+                    val w = 480
+                    val h = (w.toFloat() / page.width * page.height).toInt().coerceIn(1, 2000)
+                    val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+                    bmp.eraseColor(Color.WHITE)
+                    page.render(bmp, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                    ByteArrayOutputStream().also { bmp.compress(Bitmap.CompressFormat.JPEG, 85, it) }.toByteArray()
+                        .also { bmp.recycle() }
+                }
+            }
+        }
+
+    /**
+     * 为书架上还没有封面的 EPUB / PDF 补提取封面（包括之前导入的书）。
+     * 会读取文件，需在后台线程调用；提取不到的书会做标记，避免每次重复尝试。
+     */
+    fun fillMissingCovers() {
+        var changed = false
+        val files = booksDir.listFiles { f -> f.isFile && f.extension.lowercase() in setOf("epub", "pdf") }.orEmpty()
+        for (f in files) {
+            val marker = File(coversDir, "${f.name}.nocover2")
+            if (File(coversDir, "${f.name}.jpg").exists() || marker.exists()) continue
+            val bytes = runCatching { extractCover(f) }.getOrNull()
+            if (bytes != null && bytes.isNotEmpty()) {
+                saveCover(f, bytes)
+                changed = true
+            } else runCatching { marker.createNewFile() }
+        }
+        if (changed) refresh()
     }
 
     fun uriFor(file: File): Uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
@@ -131,6 +229,7 @@ class LibraryRepository(private val context: Context) {
 
     companion object {
         private val NAME_RE = Regex("^(.*)\\((.*)\\)$")
+        val IMPORT_EXTENSIONS = setOf("epub", "txt", "pdf")
 
         fun sanitize(name: String): String = name
             .replace(Regex("[\\\\/:*?\"<>|\\n\\r\\t]"), "_")

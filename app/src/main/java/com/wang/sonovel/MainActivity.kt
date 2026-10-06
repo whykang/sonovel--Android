@@ -13,6 +13,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wang.sonovel.ui.AppRoot
 import com.wang.sonovel.ui.theme.SoNovelTheme
 import com.wang.sonovel.ui.theme.isAppInDarkTheme
+import com.wang.sonovel.ui.theme.parseSeedColor
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class MainActivity : ComponentActivity() {
@@ -32,7 +33,12 @@ class MainActivity : ComponentActivity() {
                 else SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
                 enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
             }
-            SoNovelTheme(darkTheme = dark, dynamicColor = settings.dynamicColor) {
+            SoNovelTheme(
+                darkTheme = dark,
+                dynamicColor = settings.dynamicColor,
+                seed = parseSeedColor(settings.themeSeed),
+                pureBlack = settings.pureBlack,
+            ) {
                 AppRoot(externalEvents)
             }
         }

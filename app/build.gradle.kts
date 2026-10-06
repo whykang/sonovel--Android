@@ -12,11 +12,17 @@ val keystoreProps = Properties().apply {
     if (f.exists()) f.inputStream().use { load(it) }
 }
 
-// 更新检测地址：读取项目根目录 local.properties 的 update.url（该文件不提交到仓库），未配置时不检测更新
-val updateUrl: String = Properties().apply {
+// 本机私有配置：读取项目根目录 local.properties（该文件不提交到仓库），未配置的项对应功能不启用
+//   update.url     更新检测地址
+//   umeng.appkey   友盟统计 AppKey
+//   umeng.channel  友盟渠道名（默认 official）
+val localProps = Properties().apply {
     val f = rootProject.file("local.properties")
     if (f.exists()) f.inputStream().use { load(it) }
-}.getProperty("update.url", "").trim()
+}
+val updateUrl: String = localProps.getProperty("update.url", "").trim()
+val umengAppKey: String = localProps.getProperty("umeng.appkey", "").trim()
+val umengChannel: String = localProps.getProperty("umeng.channel", "official").trim().ifEmpty { "official" }
 
 android {
     namespace = "com.wang.sonovel"
@@ -27,10 +33,12 @@ android {
         // Android 6.0+，覆盖绝大多数设备
         minSdk = 23
         targetSdk = 35
-        versionCode = 2
-        versionName = "2.0"
+        versionCode = 3
+        versionName = "3.0"
 
         buildConfigField("String", "UPDATE_URL", "\"$updateUrl\"")
+        buildConfigField("String", "UMENG_APPKEY", "\"$umengAppKey\"")
+        buildConfigField("String", "UMENG_CHANNEL", "\"$umengChannel\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
@@ -98,6 +106,9 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.coil.compose)
     implementation(libs.quickjs.android)
+    implementation(libs.material.kolor)
+    implementation(libs.umeng.common)
+    implementation(libs.umeng.asms)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.junit)

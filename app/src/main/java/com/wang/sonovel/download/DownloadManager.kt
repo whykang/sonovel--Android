@@ -2,6 +2,7 @@ package com.wang.sonovel.download
 
 import android.content.Context
 import androidx.core.content.ContextCompat
+import com.wang.sonovel.core.Analytics
 import com.wang.sonovel.core.BookParser
 import com.wang.sonovel.core.ChapterParser
 import com.wang.sonovel.core.ChapterProcessor
@@ -108,6 +109,7 @@ class DownloadManager(
     fun enqueue(req: DownloadRequest, bookName: String, author: String, coverUrl: String?): Long {
         val id = ids.getAndIncrement()
         val rule = req.ruleKey?.let { rules.byKey(it) } ?: rules.matchByUrl(req.url)
+        Analytics.event("download", mapOf("format" to req.format.ext, "source" to rule?.displayName.orEmpty(), "range" to if (req.chapters == null) "full" else "partial"))
         _tasks.update {
             it + DownloadTask(
                 id = id, request = req, bookName = bookName.ifBlank { "解析中…" }, author = author,

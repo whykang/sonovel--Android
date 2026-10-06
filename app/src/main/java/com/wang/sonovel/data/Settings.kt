@@ -42,6 +42,10 @@ data class AppSettings(
     // 外观
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val dynamicColor: Boolean = true,
+    /** 自选主题色（#RRGGBB）；为空时使用壁纸取色或默认绿色 */
+    val themeSeed: String? = null,
+    /** 深色模式下使用纯黑背景 */
+    val pureBlack: Boolean = false,
     /** 用户手动设置的书源开关（key 为 file#url），未设置的书源使用默认状态 */
     val sourceStates: Map<String, Boolean> = emptyMap(),
     /** 旧版本的停用列表，仅用于迁移 */
@@ -130,7 +134,10 @@ class SettingsRepository(context: Context) {
 
     /** 恢复默认设置（保留外观与书源开关） */
     fun reset() = update {
-        AppSettings(themeMode = it.themeMode, dynamicColor = it.dynamicColor, sourceStates = it.sourceStates)
+        AppSettings(
+            themeMode = it.themeMode, dynamicColor = it.dynamicColor, themeSeed = it.themeSeed,
+            pureBlack = it.pureBlack, sourceStates = it.sourceStates,
+        )
     }
 }
 
