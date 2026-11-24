@@ -4,6 +4,22 @@
 
 > 本项目参考开源项目 [freeok/so-novel](https://github.com/freeok/so-novel) 开发，书源规则与功能设计均来自原项目。
 
+## 下载
+
+**最新版本：v4.0**
+
+- [下载 Android 安装包（APK）](https://github.com/whykang/sonovel--Android/releases/download/v4.0/app-release.apk)
+- [查看 v4.0 发布页](https://github.com/whykang/sonovel--Android/releases/tag/v4.0)
+- [查看所有版本](https://github.com/whykang/sonovel--Android/releases)
+
+## v4.0 更新说明
+
+1. 修复阅读设置无法记忆的问题（重启后保留上下滚动等设置）
+2. 上下滚动模式支持无缝连续翻章（划到章尾继续划自动进入下一章）
+3. 同步上游最新书源规则（新增与更新多个书源，修复 Cloudflare 检测兼容）
+4. 底部导航调整为「书架」置顶第一、「搜索」第二
+5. 书架分为「全部」和「已下载」两栏，支持不下载直接加入书架
+
 ## 截图
 
 | 搜索 | 书架 | 阅读器 |
